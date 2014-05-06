@@ -49,6 +49,7 @@ public class Main extends javax.swing.JFrame {
      * Creates new form Main
      */
     public Main() {
+        //initialize components and data sources
         initComponents();
         jTableQueryResult.setVisible(false);
         ds = prepareDataSource();
