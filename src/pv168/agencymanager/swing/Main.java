@@ -5,28 +5,16 @@
  */
 package pv168.agencymanager.swing;
 
-import java.awt.Button;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.URL;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import org.apache.commons.dbcp.BasicDataSource;
 import pv168.agencymanager.backend.Agent;
-import pv168.agencymanager.backend.AgentManager;
 import pv168.agencymanager.backend.AgentManagerImpl;
-import pv168.agencymanager.backend.MissionManager;
 import pv168.agencymanager.backend.MissionManagerImpl;
-import pv168.agencymanager.backend.SpyAgencyManager;
 import pv168.agencymanager.backend.SpyAgencyManagerImpl;
 import pv168.common.DBUtils;
 import static pv168.common.DBUtils.date;
@@ -441,17 +429,6 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonNewAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewAgentActionPerformed
-//        JDialog newAgentDialog = new JDialog();
-//        JTextField nameTextField = new JTextField("Id");
-//        JButton newAgentButton = new JButton("Add Agent");
-//        JButton cancelButton = new JButton("Cancel");
-//        
-//        newAgentDialog.setLayout(new FlowLayout());
-//        newAgentDialog.add(nameTextField);
-//        newAgentDialog.add(newAgentButton);
-//        newAgentDialog.add(cancelButton);
-//        newAgentDialog.setSize(400, 300);
-//        newAgentDialog.setVisible(true);
         NewAgentDialog dialog = new NewAgentDialog(null, true, strings, (AgentsTableModel) jTableAgents.getModel());
         dialog.setVisible(true);
     }//GEN-LAST:event_jButtonNewAgentActionPerformed

@@ -20,7 +20,7 @@ import pv168.common.DBUtils;
 public class NewAgentDialog extends javax.swing.JDialog {
 
     private ResourceBundle strings;
-    public static Logger logger = Logger.getLogger(NewAgentDialog.class.getName());
+    public static final Logger logger = Logger.getLogger(NewAgentDialog.class.getName());
     private DaysMonthsYears daysMonthsYears;
     private AgentsTableModel tableModel;
 
