@@ -6,12 +6,20 @@
 
 package pv168.agencymanager.swing;
 
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import javax.swing.JOptionPane;
+import pv168.agencymanager.backend.Agent;
+import pv168.agencymanager.backend.Mission;
+import static pv168.agencymanager.swing.NewAgentDialog.logger;
+import pv168.common.DBUtils;
+
 /**
  *
  * @author vlado
  */
 public class NewMissionDialog extends javax.swing.JDialog {
-
+    private ResourceBundle strings;
     /**
      * Creates new form NewAgentDialog
      */
@@ -55,6 +63,11 @@ public class NewMissionDialog extends javax.swing.JDialog {
         jLabelInProgress.setText("In Progress:");
 
         jButtonAddMission.setText("Add Mission");
+        jButtonAddMission.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddMissionActionPerformed(evt);
+            }
+        });
 
         jButtonCancel.setText("Cancel");
 
@@ -132,6 +145,21 @@ public class NewMissionDialog extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonAddMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddMissionActionPerformed
+       Mission mission = new Mission();
+
+        // Name
+        if (jTextFieldCodeName.getText() == null) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted code name was NULL");
+            return;
+        } else {
+            mission.setCodeName(jTextFieldCodeName.getText());
+        }
+        
+               
+    }//GEN-LAST:event_jButtonAddMissionActionPerformed
 
     /**
      * @param args the command line arguments
