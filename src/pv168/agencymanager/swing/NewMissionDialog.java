@@ -8,8 +8,9 @@ package pv168.agencymanager.swing;
 
 import java.util.ResourceBundle;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
-import pv168.agencymanager.backend.Agent;
 import pv168.agencymanager.backend.Mission;
 import static pv168.agencymanager.swing.NewAgentDialog.logger;
 import pv168.common.DBUtils;
@@ -19,13 +20,35 @@ import pv168.common.DBUtils;
  * @author vlado
  */
 public class NewMissionDialog extends javax.swing.JDialog {
+   
     private ResourceBundle strings;
-    /**
-     * Creates new form NewAgentDialog
-     */
+    public static final Logger logger = Logger.getLogger(NewAgentDialog.class.getName());
+    private DaysMonthsYears daysMonthsYears;
+    private MissionsTableModel tableModel;
+    
+    
     public NewMissionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        this.strings = strings;
+        this.tableModel = tableModel;
+        daysMonthsYears = new DaysMonthsYears(getLocale());
+        
+        jComboBoxDay.setModel(new DefaultComboBoxModel(daysMonthsYears.DAYS));
+        jComboBoxMonth.setModel(new DefaultComboBoxModel(daysMonthsYears.MONTHS));
+        jComboBoxYear.setModel(new DefaultComboBoxModel(daysMonthsYears.YEARS));
+
+        this.setTitle(strings.getString("addNewMission"));
+
+        jButtonAddMission.setText(strings.getString("addMission"));
+        jButtonCancel.setText(strings.getString("cancel"));
+
+        jLabelLabel.setText(strings.getString("newMission"));
+        jLabelCodeName.setText(strings.getString("codeName") + ":");
+        jLabelDateCreated.setText(strings.getString("dateCreated") + ":");
+        jLabelMaxNumAgents.setText(strings.getString("maxNumberOfAgents") + ":");  
+        jLabelInProgress.setText(strings.getString("inProgress") + ":");   
+        jLabelNotes.setText(strings.getString("notes") + ":");
     }
 
     /**
@@ -40,9 +63,7 @@ public class NewMissionDialog extends javax.swing.JDialog {
         jLabelCodeName = new javax.swing.JLabel();
         jTextFieldCodeName = new javax.swing.JTextField();
         jLabelDateCreated = new javax.swing.JLabel();
-        jTextFieldDateCreated = new javax.swing.JTextField();
         jLabelMaxNumAgents = new javax.swing.JLabel();
-        jTextFieldMaxNumAgents = new javax.swing.JTextField();
         jLabelInProgress = new javax.swing.JLabel();
         jCheckBoxInProgress = new javax.swing.JCheckBox();
         jButtonAddMission = new javax.swing.JButton();
@@ -50,7 +71,11 @@ public class NewMissionDialog extends javax.swing.JDialog {
         jLabelLabel = new javax.swing.JLabel();
         jLabelNotes = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jTextAreaNotes = new javax.swing.JTextArea();
+        jComboBoxDay = new javax.swing.JComboBox();
+        jComboBoxMonth = new javax.swing.JComboBox();
+        jComboBoxYear = new javax.swing.JComboBox();
+        jTextFieldMaxAgents = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -75,9 +100,15 @@ public class NewMissionDialog extends javax.swing.JDialog {
 
         jLabelNotes.setText("Notes:");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        jTextAreaNotes.setColumns(20);
+        jTextAreaNotes.setRows(5);
+        jScrollPane1.setViewportView(jTextAreaNotes);
+
+        jComboBoxDay.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jComboBoxMonth.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jComboBoxYear.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -97,15 +128,19 @@ public class NewMissionDialog extends javax.swing.JDialog {
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jTextFieldCodeName, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
-                                .addComponent(jTextFieldDateCreated)
-                                .addComponent(jTextFieldMaxNumAgents)
-                                .addComponent(jCheckBoxInProgress))))
+                            .addComponent(jTextFieldCodeName, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jCheckBoxInProgress)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextFieldMaxAgents, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(29, 29, 29)
                         .addComponent(jButtonCancel)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(56, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabelLabel)
@@ -121,13 +156,16 @@ public class NewMissionDialog extends javax.swing.JDialog {
                     .addComponent(jLabelCodeName)
                     .addComponent(jTextFieldCodeName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelDateCreated)
-                    .addComponent(jTextFieldDateCreated, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jComboBoxDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxMonth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabelDateCreated))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelMaxNumAgents)
-                    .addComponent(jTextFieldMaxNumAgents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextFieldMaxAgents, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jCheckBoxInProgress)
@@ -149,7 +187,7 @@ public class NewMissionDialog extends javax.swing.JDialog {
     private void jButtonAddMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddMissionActionPerformed
        Mission mission = new Mission();
 
-        // Name
+        // Code Name
         if (jTextFieldCodeName.getText() == null) {
             JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
             logger.log(Level.SEVERE, "Error: inserted code name was NULL");
@@ -158,7 +196,38 @@ public class NewMissionDialog extends javax.swing.JDialog {
             mission.setCodeName(jTextFieldCodeName.getText());
         }
         
-               
+        // Date created
+        mission.setDateCreated(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1) +
+                "-" + jComboBoxDay.getSelectedItem()));
+        
+        // Number of max agents on mission
+        try {
+            Integer i = Integer.parseInt(jTextFieldMaxAgents.getText());
+            if (i < 0) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+                return;
+            } else {
+                mission.setMaxNumberOfAgents(i);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
+                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
+            return;
+        }
+        
+        // Is in progress
+        mission.setInProgress(jCheckBoxInProgress.isSelected());
+        
+        // Notes
+        mission.setNotes(jTextAreaNotes.getText());
+        
+        tableModel.add(mission);
+        logger.log(Level.SEVERE, "Mission was added to table.");
+        
+        this.dispose();
     }//GEN-LAST:event_jButtonAddMissionActionPerformed
 
     /**
@@ -207,6 +276,9 @@ public class NewMissionDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButtonAddMission;
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JCheckBox jCheckBoxInProgress;
+    private javax.swing.JComboBox jComboBoxDay;
+    private javax.swing.JComboBox jComboBoxMonth;
+    private javax.swing.JComboBox jComboBoxYear;
     private javax.swing.JLabel jLabelCodeName;
     private javax.swing.JLabel jLabelDateCreated;
     private javax.swing.JLabel jLabelInProgress;
@@ -214,9 +286,8 @@ public class NewMissionDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabelMaxNumAgents;
     private javax.swing.JLabel jLabelNotes;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextAreaNotes;
     private javax.swing.JTextField jTextFieldCodeName;
-    private javax.swing.JTextField jTextFieldDateCreated;
-    private javax.swing.JTextField jTextFieldMaxNumAgents;
+    private javax.swing.JTextField jTextFieldMaxAgents;
     // End of variables declaration//GEN-END:variables
 }

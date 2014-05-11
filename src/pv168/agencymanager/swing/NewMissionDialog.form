@@ -38,12 +38,16 @@
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jScrollPane1" min="-2" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jTextFieldCodeName" pref="150" max="32767" attributes="0"/>
-                              <Component id="jTextFieldDateCreated" max="32767" attributes="0"/>
-                              <Component id="jTextFieldMaxNumAgents" max="32767" attributes="0"/>
-                              <Component id="jCheckBoxInProgress" min="-2" max="-2" attributes="0"/>
+                          <Component id="jTextFieldCodeName" min="-2" pref="235" max="-2" attributes="0"/>
+                          <Component id="jCheckBoxInProgress" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jComboBoxDay" min="-2" pref="50" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jComboBoxMonth" min="-2" pref="105" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jComboBoxYear" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <Component id="jTextFieldMaxAgents" alignment="0" min="-2" pref="235" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -51,7 +55,7 @@
                       <Component id="jButtonCancel" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="56" max="32767" attributes="0"/>
           </Group>
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="32767" attributes="0"/>
@@ -71,14 +75,18 @@
                   <Component id="jTextFieldCodeName" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabelDateCreated" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTextFieldDateCreated" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                      <Component id="jComboBoxDay" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jComboBoxMonth" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jComboBoxYear" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="jLabelDateCreated" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabelMaxNumAgents" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTextFieldMaxNumAgents" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTextFieldMaxAgents" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -113,14 +121,10 @@
         <Property name="text" type="java.lang.String" value="Date Created:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTextFieldDateCreated">
-    </Component>
     <Component class="javax.swing.JLabel" name="jLabelMaxNumAgents">
       <Properties>
         <Property name="text" type="java.lang.String" value="Max num of Agents:"/>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="jTextFieldMaxNumAgents">
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelInProgress">
       <Properties>
@@ -159,7 +163,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextArea" name="jTextArea1">
+        <Component class="javax.swing.JTextArea" name="jTextAreaNotes">
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
@@ -167,5 +171,43 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JComboBox" name="jComboBoxDay">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="4">
+            <StringItem index="0" value="Item 1"/>
+            <StringItem index="1" value="Item 2"/>
+            <StringItem index="2" value="Item 3"/>
+            <StringItem index="3" value="Item 4"/>
+          </StringArray>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jComboBoxMonth">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="4">
+            <StringItem index="0" value="Item 1"/>
+            <StringItem index="1" value="Item 2"/>
+            <StringItem index="2" value="Item 3"/>
+            <StringItem index="3" value="Item 4"/>
+          </StringArray>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jComboBoxYear">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="4">
+            <StringItem index="0" value="Item 1"/>
+            <StringItem index="1" value="Item 2"/>
+            <StringItem index="2" value="Item 3"/>
+            <StringItem index="3" value="Item 4"/>
+          </StringArray>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="jTextFieldMaxAgents">
+    </Component>
   </SubComponents>
 </Form>
