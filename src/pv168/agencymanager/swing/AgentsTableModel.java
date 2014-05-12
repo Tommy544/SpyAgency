@@ -79,29 +79,23 @@ public class AgentsTableModel extends AbstractTableModel{
         if (rowIndex > agents.size()) {
             throw new IllegalArgumentException(strings.getString("rowIndex_OOB"));
         }
-        else
+        else {
             agent = agents.get(rowIndex);
+        }
+        
         switch (columnIndex) {
             case 0:
-            {
                 agent.setName((String) aValue);
                 break;
-            }
             case 1:
-            {
                 agent.setAgentNumber((Integer) aValue);
                 break;
-            }
             case 2:
-            {
                 agent.setDateOfEnrollment((Date) aValue);
                 break;
-            }
             case 3:
-            {
                 agent.setIsDead((Boolean) aValue);
                 break;
-            }
             default:
                 throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
         }

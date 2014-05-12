@@ -125,13 +125,13 @@ public class MissionsTableModel extends AbstractTableModel {
         return ((columnIndex >= 0) && (columnIndex <= 4));
     }
 
-    void addAll(List<Mission> allMissions) {
-        for (Mission mission : missions) {
+    public void addAll(List<Mission> allMissions) {
+        for (Mission mission : allMissions) {
             this.add(mission);
         }
     }
 
-    void add(Mission mission) {
+    public void add(Mission mission) {
         missions.add(mission);
         fireTableRowsInserted((missions.size() - 1), missions.size() - 1);
     }
