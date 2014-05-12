@@ -195,7 +195,7 @@ public class NewMissionDialog extends javax.swing.JDialog {
         if (mission != null) {
             try {
                 missionManager.createMission(mission);
-                logger.log(Level.INFO, "Error: inserted code name was NULL");
+                logger.log(Level.INFO, "Successfuly created new mission.");
                 this.dispose();
             } catch (ServiceFailureException ex) {
                 logger.log(Level.SEVERE, "Exception while creating new mission in database.", ex);
@@ -273,7 +273,7 @@ public class NewMissionDialog extends javax.swing.JDialog {
         Mission mission = new Mission();
 
         // Code Name
-        if (jTextFieldCodeName.getText() == null) {
+        if (jTextFieldCodeName.getText() == null || jTextFieldCodeName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
             logger.log(Level.SEVERE, "Error: inserted code name was NULL");
             return null;
@@ -282,6 +282,7 @@ public class NewMissionDialog extends javax.swing.JDialog {
                 if (missionManager.findMissionByCodeName(jTextFieldCodeName.getText()) != null) {
                     JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_not_unique"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
                     logger.log(Level.SEVERE, "Error: inserted code name was not unique.");
+                    return null;
                 } else {
                     mission.setCodeName(jTextFieldCodeName.getText());
                 }

@@ -12,10 +12,11 @@ import pv168.agencymanager.backend.Mission;
  *
  * @author Kubo
  */
-public class MissionsTableModel extends AbstractTableModel{
+public class MissionsTableModel extends AbstractTableModel {
+
     private List<Mission> missions = new ArrayList<>();
     private ResourceBundle strings;
-    
+
     public MissionsTableModel(ResourceBundle resourceBundle) {
         strings = resourceBundle;
     }
@@ -23,7 +24,7 @@ public class MissionsTableModel extends AbstractTableModel{
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
-            case 0: 
+            case 0:
                 return String.class;
             case 1:
                 return Date.class;
@@ -37,10 +38,10 @@ public class MissionsTableModel extends AbstractTableModel{
                 throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
         }
     }
-    
+
     @Override
     public int getRowCount() {
-       return missions.size();
+        return missions.size();
     }
 
     @Override
@@ -50,25 +51,25 @@ public class MissionsTableModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-                 if (rowIndex > missions.size()) {
+        if (rowIndex > missions.size()) {
             throw new IllegalArgumentException(strings.getString("rowIndex_OOB"));
-         }
-         
-         Mission mission = missions.get(rowIndex);
-         switch (columnIndex) {
-             case 0: 
-                 return mission.getCodeName();
-             case 1:
-                 return mission.getDateCreated();
-             case 2:
-                 return mission.getMaxNumberOfAgents();
-             case 3:
-                 return mission.getInProgress();
-             case 4:
-                 return mission.getNotes();
-             default:
-                 throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
-         }
+        }
+
+        Mission mission = missions.get(rowIndex);
+        switch (columnIndex) {
+            case 0:
+                return mission.getCodeName();
+            case 1:
+                return mission.getDateCreated();
+            case 2:
+                return mission.getMaxNumberOfAgents();
+            case 3:
+                return mission.getInProgress();
+            case 4:
+                return mission.getNotes();
+            default:
+                throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
+        }
     }
 
     @Override
@@ -78,27 +79,27 @@ public class MissionsTableModel extends AbstractTableModel{
             throw new IllegalArgumentException(strings.getString("rowIndex_OOB"));
         } else {
             mission = missions.get(rowIndex);
-            
-            switch (columnIndex) {
-                case 0:
-                    mission.setCodeName((String) aValue);
-                    break;
-                case 1:
-                    mission.setDateCreated((Date) aValue);
-                    break;
-                case 2:
-                    mission.setMaxNumberOfAgents((Integer) aValue);
-                    break;
-                case 3:
-                    mission.setInProgress((Boolean) aValue);
-                    break;
-                case 4:
-                    mission.setNotes((String) aValue);
-                    break;
-                default:
-                    throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
-            }
         }
+        switch (columnIndex) {
+            case 0:
+                mission.setCodeName((String) aValue);
+                break;
+            case 1:
+                mission.setDateCreated((Date) aValue);
+                break;
+            case 2:
+                mission.setMaxNumberOfAgents((Integer) aValue);
+                break;
+            case 3:
+                mission.setInProgress((Boolean) aValue);
+                break;
+            case 4:
+                mission.setNotes((String) aValue);
+                break;
+            default:
+                throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
+        }
+
     }
 
     @Override

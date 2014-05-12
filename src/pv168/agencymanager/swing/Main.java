@@ -62,10 +62,6 @@ public class Main extends javax.swing.JFrame {
         agentManager.setDataSource(ds);
         missionManager.setDataSource(ds);
 
-        jTableAgents.setModel(new AgentsTableModel(strings));
-        AgentsTableModel model = (AgentsTableModel) jTableAgents.getModel();
-        model.add(new Agent(100, "Jozko", false, date("1990-01-10")));
-
         refreshJComboBoxes();
         refreshTable(TableModelsEnum.AgentsTableModel);
         refreshTable(TableModelsEnum.MissionsTableModel);
@@ -500,6 +496,8 @@ public class Main extends javax.swing.JFrame {
     private void jButtonNewMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewMissionActionPerformed
         NewMissionDialog dialog = new NewMissionDialog(null, true, strings, missionManager);
         dialog.setVisible(true);
+        refreshTable(TableModelsEnum.MissionsTableModel);
+        refreshJComboBoxes();
     }//GEN-LAST:event_jButtonNewMissionActionPerformed
 
     private void jButtonDeleteAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAgentActionPerformed

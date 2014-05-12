@@ -257,7 +257,7 @@ public class NewAgentDialog extends javax.swing.JDialog {
         Agent agent = new Agent();
         
         // Name
-        if (jTextFieldName.getText() == null) {
+        if (jTextFieldName.getText() == null || jTextFieldName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
             logger.log(Level.SEVERE, "Error: inserted name was NULL");
             return null;

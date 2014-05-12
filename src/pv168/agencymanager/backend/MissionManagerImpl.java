@@ -107,7 +107,7 @@ public class MissionManagerImpl implements MissionManager {
         try {
             conn = dataSource.getConnection();
             st = conn.prepareStatement(
-                    "SELECT id,codeName,dateCreated,inProgress,maxNumberOfAgents,notes FROM Mission WHERE codeName LIKE '?'");
+                    "SELECT id,codeName,dateCreated,inProgress,maxNumberOfAgents,notes FROM Mission WHERE codeName LIKE ?");
             st.setString(1, codeName);
             return executeQueryForSingleMission(st);
         } catch (SQLException ex) {
