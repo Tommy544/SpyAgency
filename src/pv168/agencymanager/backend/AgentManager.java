@@ -50,6 +50,16 @@ public interface AgentManager {
     public Agent findAgentById(Long id) throws ServiceFailureException;
     
     /**
+     * Method finds and returns agent whose Agent Number matches parameter number
+     * If no agent is found, returns NULL
+     * 
+     * @param number number of agent to be found
+     * @return Agent with specified id
+     * @throws pv168.common.ServiceFailureException
+     */
+    public Agent findAgentByAgentNumber(Integer number) throws ServiceFailureException;
+    
+    /**
      * Method returns a list of all Agents in database
      * 
      * @return List of all agents

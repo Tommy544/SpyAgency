@@ -73,11 +73,11 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <Component id="jTabbedPane" pref="525" max="32767" attributes="0"/>
+              <Component id="jTabbedPane" pref="495" max="32767" attributes="0"/>
               <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jTabbedPaneOperations" max="32767" attributes="0"/>
-                  <Component id="jScrollPane3" max="32767" attributes="0"/>
+                  <Component id="jScrollPaneResultTable" max="32767" attributes="0"/>
               </Group>
           </Group>
       </Group>
@@ -87,7 +87,7 @@
           <Group type="102" attributes="0">
               <Component id="jTabbedPaneOperations" min="-2" pref="193" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane3" pref="0" max="32767" attributes="0"/>
+              <Component id="jScrollPaneResultTable" pref="0" max="32767" attributes="0"/>
           </Group>
           <Component id="jTabbedPane" alignment="0" pref="400" max="32767" attributes="0"/>
       </Group>
@@ -95,6 +95,11 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JTabbedPane" name="jTabbedPane">
+      <Properties>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[470, 108]"/>
+        </Property>
+      </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
@@ -309,7 +314,7 @@
                               <Component id="jButtonDeleteAgent" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="181" max="32767" attributes="0"/>
+                      <EmptySpace pref="211" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -351,6 +356,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Delete selected Agent"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteAgentActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -376,7 +384,7 @@
                               <Component id="jButtonDeleteMission" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="251" max="32767" attributes="0"/>
+                      <EmptySpace pref="221" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -416,7 +424,7 @@
             </Component>
             <Component class="javax.swing.JButton" name="jButtonDeleteMission">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Delete Mission"/>
+                <Property name="text" type="java.lang.String" value="Delete Selected Mission"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -637,7 +645,7 @@
         </Container>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane3">
+    <Container class="javax.swing.JScrollPane" name="jScrollPaneResultTable">
       <AuxValues>
         <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
       </AuxValues>

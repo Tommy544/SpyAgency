@@ -6,18 +6,23 @@
 package pv168.agencymanager.swing;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.table.TableModel;
 import org.apache.commons.dbcp.BasicDataSource;
 import pv168.agencymanager.backend.Agent;
 import pv168.agencymanager.backend.AgentManagerImpl;
+import pv168.agencymanager.backend.Mission;
 import pv168.agencymanager.backend.MissionManagerImpl;
 import pv168.agencymanager.backend.SpyAgencyManagerImpl;
 import pv168.common.DBUtils;
 import static pv168.common.DBUtils.date;
+import pv168.common.ServiceFailureException;
 
 /**
  *
@@ -32,6 +37,9 @@ public class Main extends javax.swing.JFrame {
     private MissionManagerImpl missionManager = new MissionManagerImpl();
     public static final Logger logger = Logger.getLogger(Main.class.getName());
 
+    private enum ComboBoxEnum {
+        AllAgents, AllMissions; 
+    }
     
     /**
      * Creates new form Main
@@ -39,7 +47,7 @@ public class Main extends javax.swing.JFrame {
     public Main() {
         //initialize components and data sources
         initComponents();
-        jTableQueryResult.setVisible(false);
+        jScrollPaneResultTable.setVisible(false);
         ds = prepareDataSource();
         spyAgencyManager.setDataSource(ds);
         agentManager.setDataSource(ds);
@@ -48,6 +56,9 @@ public class Main extends javax.swing.JFrame {
         jTableAgents.setModel(new AgentsTableModel(strings));
         AgentsTableModel model = (AgentsTableModel) jTableAgents.getModel();
         model.add(new Agent(100, "Jozko", false, date("1990-01-10")));
+        
+        refreshJComboBoxes();
+        refreshTable(jTableAgents.getModel());
 
         // Localization of GUI elements
         jTabbedPane.setTitleAt(0, strings.getString("agents"));
@@ -121,7 +132,7 @@ public class Main extends javax.swing.JFrame {
         jLabelSelectMission = new javax.swing.JLabel();
         jButtonAssignAgentOnMission = new javax.swing.JButton();
         jButtonRemoveAgentFromMission = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        jScrollPaneResultTable = new javax.swing.JScrollPane();
         jTableQueryResult = new javax.swing.JTable();
 
         javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
@@ -158,6 +169,8 @@ public class Main extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jTabbedPane.setMinimumSize(new java.awt.Dimension(470, 108));
 
         jTableAgents.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -215,6 +228,11 @@ public class Main extends javax.swing.JFrame {
         jComboBoxDeleteAgent.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "James Bond", "Janko Hrasko" }));
 
         jButtonDeleteAgent.setText("Delete selected Agent");
+        jButtonDeleteAgent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteAgentActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelAgentsLayout = new javax.swing.GroupLayout(jPanelAgents);
         jPanelAgents.setLayout(jPanelAgentsLayout);
@@ -228,7 +246,7 @@ public class Main extends javax.swing.JFrame {
                         .addComponent(jComboBoxDeleteAgent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDeleteAgent)))
-                .addContainerGap(181, Short.MAX_VALUE))
+                .addContainerGap(211, Short.MAX_VALUE))
         );
         jPanelAgentsLayout.setVerticalGroup(
             jPanelAgentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -253,7 +271,7 @@ public class Main extends javax.swing.JFrame {
 
         jComboBoxDeleteMission.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Stary Otec", "Jastrab" }));
 
-        jButtonDeleteMission.setText("Delete Mission");
+        jButtonDeleteMission.setText("Delete Selected Mission");
 
         javax.swing.GroupLayout jPanelMissionsLayout = new javax.swing.GroupLayout(jPanelMissions);
         jPanelMissions.setLayout(jPanelMissionsLayout);
@@ -267,7 +285,7 @@ public class Main extends javax.swing.JFrame {
                         .addComponent(jComboBoxDeleteMission, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonDeleteMission)))
-                .addContainerGap(251, Short.MAX_VALUE))
+                .addContainerGap(221, Short.MAX_VALUE))
         );
         jPanelMissionsLayout.setVerticalGroup(
             jPanelMissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -403,25 +421,25 @@ public class Main extends javax.swing.JFrame {
                 "null"
             }
         ));
-        jScrollPane3.setViewportView(jTableQueryResult);
+        jScrollPaneResultTable.setViewportView(jTableQueryResult);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 525, Short.MAX_VALUE)
+                .addComponent(jTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTabbedPaneOperations)
-                    .addComponent(jScrollPane3)))
+                    .addComponent(jScrollPaneResultTable)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jTabbedPaneOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addComponent(jScrollPaneResultTable, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
             .addComponent(jTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
         );
 
@@ -429,14 +447,29 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonNewAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewAgentActionPerformed
-        NewAgentDialog dialog = new NewAgentDialog(null, true, strings, (AgentsTableModel) jTableAgents.getModel());
+        NewAgentDialog dialog = new NewAgentDialog(null, true, strings, agentManager);
         dialog.setVisible(true);
+        refreshTable(jTableAgents.getModel());
+        refreshJComboBoxes();
     }//GEN-LAST:event_jButtonNewAgentActionPerformed
 
     private void jButtonNewMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewMissionActionPerformed
         NewMissionDialog dialog = new NewMissionDialog(null, true);
         dialog.setVisible(true);
     }//GEN-LAST:event_jButtonNewMissionActionPerformed
+
+    private void jButtonDeleteAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAgentActionPerformed
+        try {
+            String[] strings = ((String) jComboBoxDeleteAgent.getSelectedItem()).split("\\(|\\)");
+            Integer number = Integer.parseInt(strings[strings.length - 1]);
+            Agent deleteAgent = agentManager.findAgentByAgentNumber(number);
+            agentManager.dismissAgent(deleteAgent);
+        } catch (ServiceFailureException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        refreshTable(jTableAgents.getModel());
+        refreshJComboBoxes();
+    }//GEN-LAST:event_jButtonDeleteAgentActionPerformed
 
     /**
      * @param args the command line arguments
@@ -504,7 +537,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelSearchAssignments;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPaneResultTable;
     private javax.swing.JTabbedPane jTabbedPane;
     private javax.swing.JTabbedPane jTabbedPaneOperations;
     private javax.swing.JTable jTableAgents;
@@ -533,5 +566,98 @@ public class Main extends javax.swing.JFrame {
         }
 
         return newDs;
+    }
+    
+    private String[] getJComboBoxValues(ComboBoxEnum mode) throws ServiceFailureException {
+        int i = 0;
+        String[] resultArray = null;
+        
+        switch (mode) {
+            case AllAgents:
+                resultArray = new String[agentManager.getAllAgents().size()];
+                for (Agent agent : agentManager.getAllAgents()) {
+                    resultArray[i] = agent.getName() + " (" + agent.getAgentNumber() + ")";
+                    i++;
+                }
+                break;
+            case AllMissions:
+                resultArray = new String[missionManager.getAllMissions().size()];
+                for (Mission mission : missionManager.getAllMissions()) {
+                    resultArray[i] = mission.getCodeName();
+                    i++;
+                }
+                break;
+        }
+        
+        return (resultArray == null ? new String[0] : resultArray);
+    }
+    
+    private void refreshJComboBoxes() {
+        try {
+            jComboBoxDeleteAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            if (jComboBoxDeleteAgent.getSelectedItem() == null) {
+                jButtonDeleteAgent.setEnabled(false);
+            } else {
+                jButtonDeleteAgent.setEnabled(true);
+            }
+            jComboBoxDeleteMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+            if (jComboBoxDeleteMission.getSelectedItem() == null) {
+                jButtonDeleteMission.setEnabled(false);
+            } else {
+                jButtonDeleteMission.setEnabled(true);
+            }
+            jComboBoxAssignAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            if (jComboBoxAssignAgent.getSelectedItem() == null) {
+                jButtonAssignAgentOnMission.setEnabled(false);
+                jButtonRemoveAgentFromMission.setEnabled(false);
+            } else {
+                jButtonAssignAgentOnMission.setEnabled(true);
+                jButtonRemoveAgentFromMission.setEnabled(true);
+            }
+            jComboBoxAssignMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+             if (jComboBoxAssignMission.getSelectedItem() == null) {
+                jButtonAssignAgentOnMission.setEnabled(false);
+                jButtonRemoveAgentFromMission.setEnabled(false);
+            } else {
+                jButtonAssignAgentOnMission.setEnabled(true);
+                jButtonRemoveAgentFromMission.setEnabled(true);
+            }
+            jComboBoxSearchAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            if (jComboBoxSearchAgent.getSelectedItem() == null) {
+                jButtonFindAssignedMission.setEnabled(false);
+            } else {
+                jButtonFindAssignedMission.setEnabled(true);
+            }
+            jComboBoxSearchMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+            if (jComboBoxSearchMission.getSelectedItem() == null) {
+                jButtonFindAssignedAgents.setEnabled(false);
+            } else {
+                jButtonFindAssignedAgents.setEnabled(true);
+            }
+        } catch (ServiceFailureException ex) {
+            logger.log(Level.SEVERE, "Exception while refreshing combo boxes.", ex);
+        }
+    }
+    
+    private void refreshTable(TableModel model) {
+        if (model instanceof AgentsTableModel) {
+            try {
+                //AgentsTableModel tm = (AgentsTableModel) model;
+                AgentsTableModel tm = new AgentsTableModel(strings);
+                tm.addAll(agentManager.getAllAgents());
+                jTableAgents.setModel(tm);
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while refreshing Agents table.", ex);
+            }
+        } else if (model instanceof MissionsTableModel) {
+            try {
+                //MissionsTableModel tm = (MissionsTableModel) model;
+                MissionsTableModel tm = new MissionsTableModel(strings);
+                tm.addAll(missionManager.getAllMissions());
+                jTableMissions.setModel(tm);
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while refreshing Missions table.", ex);
+            }
+        }
     }
 }

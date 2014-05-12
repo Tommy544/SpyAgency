@@ -15,6 +15,10 @@ import pv168.agencymanager.backend.Mission;
 public class MissionsTableModel extends AbstractTableModel{
     private List<Mission> missions = new ArrayList<>();
     private ResourceBundle strings;
+    
+    public MissionsTableModel(ResourceBundle resourceBundle) {
+        strings = resourceBundle;
+    }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
@@ -67,6 +71,7 @@ public class MissionsTableModel extends AbstractTableModel{
          }
     }
 
-
-    
+    void addAll(List<Mission> allMissions) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

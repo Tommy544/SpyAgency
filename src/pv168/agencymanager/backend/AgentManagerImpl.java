@@ -186,6 +186,31 @@ public class AgentManagerImpl implements AgentManager {
     }
 
     @Override
+    public Agent findAgentByAgentNumber(Integer number) throws ServiceFailureException {
+        checkDataSource();
+
+        if (number == null) {
+            throw new IllegalArgumentException("number is null");
+        }
+
+        Connection conn = null;
+        PreparedStatement st = null;
+        try {
+            conn = dataSource.getConnection();
+            st = conn.prepareStatement(
+                    "SELECT id, number, name, isdead, enrollment FROM agent WHERE number = ?");
+            st.setInt(1, number);
+            return executeQueryForSingleAgent(st);
+        } catch (SQLException e) {
+            String msg = "Error when getting agent with number = " + number + " from DB";
+            logger.log(Level.SEVERE, msg, e);
+            throw new ServiceFailureException(msg, e);
+        } finally {
+            DBUtils.closeQuietly(conn, st);
+        }
+    }
+    
+    @Override
     public List<Agent> getAllAgents() throws ServiceFailureException {
         checkDataSource();
 

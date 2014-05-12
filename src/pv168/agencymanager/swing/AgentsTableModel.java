@@ -133,4 +133,10 @@ public class AgentsTableModel extends AbstractTableModel{
         agents.add(agent);
         fireTableRowsInserted((agents.size() - 1), agents.size() - 1);
     }
+    
+    public void addAll(List<Agent> agents) {
+        for (Agent agent : agents) {
+            this.add(agent);
+        }
+    }
 }

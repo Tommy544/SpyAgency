@@ -11,7 +11,9 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import pv168.agencymanager.backend.Agent;
+import pv168.agencymanager.backend.AgentManagerImpl;
 import pv168.common.DBUtils;
+import pv168.common.ServiceFailureException;
 
 /**
  *
@@ -22,16 +24,16 @@ public class NewAgentDialog extends javax.swing.JDialog {
     private ResourceBundle strings;
     public static final Logger logger = Logger.getLogger(NewAgentDialog.class.getName());
     private DaysMonthsYears daysMonthsYears;
-    private AgentsTableModel tableModel;
+    private AgentManagerImpl agentManager;
 
     /**
      * Creates new form NewAgentDialog
      */
-    public NewAgentDialog(java.awt.Frame parent, boolean modal, ResourceBundle strings, AgentsTableModel tableModel) {
+    public NewAgentDialog(java.awt.Frame parent, boolean modal, ResourceBundle strings, AgentManagerImpl agentManager) {
         super(parent, modal);
         initComponents();
         this.strings = strings;
-        this.tableModel = tableModel;
+        this.agentManager = agentManager;
         daysMonthsYears = new DaysMonthsYears(getLocale());
         
         jComboBoxDay.setModel(new DefaultComboBoxModel(daysMonthsYears.DAYS));
@@ -175,46 +177,17 @@ public class NewAgentDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAddAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAgentActionPerformed
-        Agent agent = new Agent();
-
-        // Name
-        if (jTextFieldName.getText() == null) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted name was NULL");
-            return;
-        } else {
-            agent.setName(jTextFieldName.getText());
-        }
+        Agent agent = checkAgent();
         
-        // Agent Number
-        try {
-            Integer i = Integer.parseInt(jTextFieldNumber.getText());
-            if (i < 0) {
-                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
-                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
-                return;
-            } else {
-                agent.setAgentNumber(i);
+        if (agent != null) {
+            try {
+                agentManager.trainAgent(agent);
+                logger.log(Level.INFO, "Agent was added to table.");
+                this.dispose();
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while trying to add new Agent to database.", ex);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
-                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
-            return;
         }
-        
-        // Date of Enrollment
-        agent.setDateOfEnrollment(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1) +
-                "-" + jComboBoxDay.getSelectedItem()));
-        
-        // Is Dead
-        agent.setIsDead(jCheckBoxIsDead.isSelected());
-        
-        tableModel.add(agent);
-        logger.log(Level.SEVERE, "Agent was added to table.");
-        
-        this.dispose();
     }//GEN-LAST:event_jButtonAddAgentActionPerformed
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
@@ -279,4 +252,51 @@ public class NewAgentDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldName;
     private javax.swing.JTextField jTextFieldNumber;
     // End of variables declaration//GEN-END:variables
+
+    public Agent checkAgent() {
+        Agent agent = new Agent();
+        
+        // Name
+        if (jTextFieldName.getText() == null) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted name was NULL");
+            return null;
+        } else {
+            agent.setName(jTextFieldName.getText());
+        }
+        
+        // Agent Number
+        try {
+            Integer i = Integer.parseInt(jTextFieldNumber.getText());
+            if (i < 0) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+                return null;
+            } else if (agentManager.findAgentByAgentNumber(i) != null) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_unique_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number that was not unique");
+                return null;
+            } else {
+                agent.setAgentNumber(i);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
+                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
+            return null;
+        } catch (ServiceFailureException ex) {
+            logger.log(Level.SEVERE, "Exception while checking uniqueness of inserted Agent Number", ex);
+        }
+        
+        // Date of Enrollment
+        agent.setDateOfEnrollment(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1) +
+                "-" + jComboBoxDay.getSelectedItem()));
+        
+        // Is Dead
+        agent.setIsDead(jCheckBoxIsDead.isSelected());
+        
+        return agent;
+    }
 }
