@@ -8,6 +8,8 @@ public interface MissionManager {
     
     Mission findMissionById(Long id) throws ServiceFailureException;
     
+    Mission findMissionByCodeName(String codeName) throws ServiceFailureException;
+    
     List<Mission> getAllMissions() throws ServiceFailureException;
     
     void removeMission(Mission mission) throws ServiceFailureException;

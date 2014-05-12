@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package pv168.agencymanager.swing;
 
 import java.util.ResourceBundle;
@@ -12,28 +11,29 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import pv168.agencymanager.backend.Mission;
+import pv168.agencymanager.backend.MissionManagerImpl;
 import static pv168.agencymanager.swing.NewAgentDialog.logger;
 import pv168.common.DBUtils;
+import pv168.common.ServiceFailureException;
 
 /**
  *
  * @author vlado
  */
 public class NewMissionDialog extends javax.swing.JDialog {
-   
+
     private ResourceBundle strings;
     public static final Logger logger = Logger.getLogger(NewAgentDialog.class.getName());
     private DaysMonthsYears daysMonthsYears;
-    private MissionsTableModel tableModel;
-    
-    
-    public NewMissionDialog(java.awt.Frame parent, boolean modal) {
+    private MissionManagerImpl missionManager;
+
+    public NewMissionDialog(java.awt.Frame parent, boolean modal, ResourceBundle resourceBundle, MissionManagerImpl missionManager) {
         super(parent, modal);
         initComponents();
-        this.strings = strings;
-        this.tableModel = tableModel;
+        this.strings = resourceBundle;
+        this.missionManager = missionManager;
         daysMonthsYears = new DaysMonthsYears(getLocale());
-        
+
         jComboBoxDay.setModel(new DefaultComboBoxModel(daysMonthsYears.DAYS));
         jComboBoxMonth.setModel(new DefaultComboBoxModel(daysMonthsYears.MONTHS));
         jComboBoxYear.setModel(new DefaultComboBoxModel(daysMonthsYears.YEARS));
@@ -46,8 +46,8 @@ public class NewMissionDialog extends javax.swing.JDialog {
         jLabelLabel.setText(strings.getString("newMission"));
         jLabelCodeName.setText(strings.getString("codeName") + ":");
         jLabelDateCreated.setText(strings.getString("dateCreated") + ":");
-        jLabelMaxNumAgents.setText(strings.getString("maxNumberOfAgents") + ":");  
-        jLabelInProgress.setText(strings.getString("inProgress") + ":");   
+        jLabelMaxNumAgents.setText(strings.getString("maxNumberOfAgents") + ":");
+        jLabelInProgress.setText(strings.getString("inProgress") + ":");
         jLabelNotes.setText(strings.getString("notes") + ":");
     }
 
@@ -95,6 +95,11 @@ public class NewMissionDialog extends javax.swing.JDialog {
         });
 
         jButtonCancel.setText("Cancel");
+        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCancelActionPerformed(evt);
+            }
+        });
 
         jLabelLabel.setText("NEW MISSION");
 
@@ -185,50 +190,23 @@ public class NewMissionDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAddMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddMissionActionPerformed
-       Mission mission = new Mission();
+        Mission mission = checkMission();
 
-        // Code Name
-        if (jTextFieldCodeName.getText() == null) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted code name was NULL");
-            return;
-        } else {
-            mission.setCodeName(jTextFieldCodeName.getText());
-        }
-        
-        // Date created
-        mission.setDateCreated(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1) +
-                "-" + jComboBoxDay.getSelectedItem()));
-        
-        // Number of max agents on mission
-        try {
-            Integer i = Integer.parseInt(jTextFieldMaxAgents.getText());
-            if (i < 0) {
-                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
-                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
-                return;
-            } else {
-                mission.setMaxNumberOfAgents(i);
+        if (mission != null) {
+            try {
+                missionManager.createMission(mission);
+                logger.log(Level.INFO, "Error: inserted code name was NULL");
+                this.dispose();
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while creating new mission in database.", ex);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
-                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
-            return;
         }
-        
-        // Is in progress
-        mission.setInProgress(jCheckBoxInProgress.isSelected());
-        
-        // Notes
-        mission.setNotes(jTextAreaNotes.getText());
-        
-        tableModel.add(mission);
-        logger.log(Level.SEVERE, "Mission was added to table.");
-        
-        this.dispose();
     }//GEN-LAST:event_jButtonAddMissionActionPerformed
+
+    private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
+        logger.log(Level.SEVERE, "User pressed Cancel button in New Mission Dialog.");
+        this.dispose();
+    }//GEN-LAST:event_jButtonCancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -260,14 +238,14 @@ public class NewMissionDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                NewMissionDialog dialog = new NewMissionDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+//                NewMissionDialog dialog = new NewMissionDialog(new javax.swing.JFrame(), true);
+//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+//                    @Override
+//                    public void windowClosing(java.awt.event.WindowEvent e) {
+//                        System.exit(0);
+//                    }
+//                });
+//                dialog.setVisible(true);
             }
         });
     }
@@ -290,4 +268,57 @@ public class NewMissionDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldCodeName;
     private javax.swing.JTextField jTextFieldMaxAgents;
     // End of variables declaration//GEN-END:variables
+
+    private Mission checkMission() {
+        Mission mission = new Mission();
+
+        // Code Name
+        if (jTextFieldCodeName.getText() == null) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted code name was NULL");
+            return null;
+        } else {
+            try {
+                if (missionManager.findMissionByCodeName(jTextFieldCodeName.getText()) != null) {
+                    JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_not_unique"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.SEVERE, "Error: inserted code name was not unique.");
+                } else {
+                    mission.setCodeName(jTextFieldCodeName.getText());
+                }
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while checking uniqeness of Code Name.", ex);
+            }
+        }
+
+        // Date created
+        mission.setDateCreated(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1)
+                + "-" + jComboBoxDay.getSelectedItem()));
+
+        // Number of max agents on mission
+        try {
+            Integer i = Integer.parseInt(jTextFieldMaxAgents.getText());
+            if (i < 0) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+                return null;
+            } else {
+                mission.setMaxNumberOfAgents(i);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
+                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
+            return null;
+        }
+
+        // Is in progress
+        mission.setInProgress(jCheckBoxInProgress.isSelected());
+
+        // Notes
+        mission.setNotes(jTextAreaNotes.getText());
+
+        return mission;
+    }
+
 }

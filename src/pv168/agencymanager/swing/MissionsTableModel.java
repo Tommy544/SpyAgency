@@ -71,7 +71,67 @@ public class MissionsTableModel extends AbstractTableModel{
          }
     }
 
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        Mission mission = null;
+        if (rowIndex > missions.size()) {
+            throw new IllegalArgumentException(strings.getString("rowIndex_OOB"));
+        } else {
+            mission = missions.get(rowIndex);
+            
+            switch (columnIndex) {
+                case 0:
+                    mission.setCodeName((String) aValue);
+                    break;
+                case 1:
+                    mission.setDateCreated((Date) aValue);
+                    break;
+                case 2:
+                    mission.setMaxNumberOfAgents((Integer) aValue);
+                    break;
+                case 3:
+                    mission.setInProgress((Boolean) aValue);
+                    break;
+                case 4:
+                    mission.setNotes((String) aValue);
+                    break;
+                default:
+                    throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
+            }
+        }
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        switch (column) {
+            case 0:
+                return strings.getString("codeName");
+            case 1:
+                return strings.getString("dateCreated");
+            case 2:
+                return strings.getString("maxNumberOfAgents");
+            case 3:
+                return strings.getString("inProgress");
+            case 4:
+                return strings.getString("notes");
+            default:
+                throw new IllegalArgumentException(strings.getString("columnIndex_OOB"));
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return ((columnIndex >= 0) && (columnIndex <= 4));
+    }
+
     void addAll(List<Mission> allMissions) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (Mission mission : missions) {
+            this.add(mission);
+        }
+    }
+
+    void add(Mission mission) {
+        missions.add(mission);
+        fireTableRowsInserted((missions.size() - 1), missions.size() - 1);
     }
 }

@@ -93,6 +93,31 @@ public class MissionManagerImpl implements MissionManager {
             DBUtils.closeQuietly(conn, st);
         }
     }
+    
+    @Override
+    public Mission findMissionByCodeName(String codeName) throws ServiceFailureException {
+        checkDataSource();
+
+        if (codeName == null) {
+            throw new IllegalArgumentException("codeName is null");
+        }
+
+        Connection conn = null;
+        PreparedStatement st = null;
+        try {
+            conn = dataSource.getConnection();
+            st = conn.prepareStatement(
+                    "SELECT id,codeName,dateCreated,inProgress,maxNumberOfAgents,notes FROM Mission WHERE codeName LIKE '?'");
+            st.setString(1, codeName);
+            return executeQueryForSingleMission(st);
+        } catch (SQLException ex) {
+            String msg = "Error when getting mission with codeName = " + codeName + " from DB";
+            logger.log(Level.SEVERE, msg, ex);
+            throw new ServiceFailureException(msg, ex);
+        } finally {
+            DBUtils.closeQuietly(conn, st);
+        }
+    }
 
     @Override
     public List<Mission> getAllMissions() throws ServiceFailureException {

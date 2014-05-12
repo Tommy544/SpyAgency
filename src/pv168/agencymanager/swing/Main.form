@@ -73,10 +73,10 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <Component id="jTabbedPane" pref="495" max="32767" attributes="0"/>
+              <Component id="jTabbedPane" pref="524" max="32767" attributes="0"/>
               <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTabbedPaneOperations" max="32767" attributes="0"/>
+                  <Component id="jTabbedPaneOperations" pref="558" max="32767" attributes="0"/>
                   <Component id="jScrollPaneResultTable" max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -314,7 +314,7 @@
                               <Component id="jButtonDeleteAgent" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="211" max="32767" attributes="0"/>
+                      <EmptySpace pref="240" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -384,7 +384,7 @@
                               <Component id="jButtonDeleteMission" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="221" max="32767" attributes="0"/>
+                      <EmptySpace pref="250" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -426,6 +426,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Delete Selected Mission"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteMissionActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -500,11 +503,17 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Find Unassigned Agents"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonFindUnassignedAgentsActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="jButtonFindMissionsWithFreeSpace">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Find Missions with free space"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonFindMissionsWithFreeSpaceActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabelSearchAgent">
               <Properties>
@@ -540,11 +549,17 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Find Mission assigned to Agent"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonFindAssignedMissionActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="jButtonFindAssignedAgents">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Find Agents assigned to Mission"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonFindAssignedAgentsActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -635,11 +650,17 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Assign Agent on a Mission"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAssignAgentOnMissionActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="jButtonRemoveAgentFromMission">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Remove Agent from Mission"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonRemoveAgentFromMissionActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
