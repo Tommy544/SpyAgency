@@ -118,10 +118,12 @@ public class Main extends javax.swing.JFrame {
         jButtonNewAgent = new javax.swing.JButton();
         jComboBoxDeleteAgent = new javax.swing.JComboBox();
         jButtonDeleteAgent = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         jPanelMissions = new javax.swing.JPanel();
         jButtonNewMission = new javax.swing.JButton();
         jComboBoxDeleteMission = new javax.swing.JComboBox();
         jButtonDeleteMission = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanelSearchAssignments = new javax.swing.JPanel();
         jButtonFindUnassignedAgents = new javax.swing.JButton();
         jButtonFindMissionsWithFreeSpace = new javax.swing.JButton();
@@ -240,6 +242,13 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        jButton1.setText("Edit");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelAgentsLayout = new javax.swing.GroupLayout(jPanelAgents);
         jPanelAgents.setLayout(jPanelAgentsLayout);
         jPanelAgentsLayout.setHorizontalGroup(
@@ -251,8 +260,9 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(jPanelAgentsLayout.createSequentialGroup()
                         .addComponent(jComboBoxDeleteAgent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButtonDeleteAgent)))
-                .addContainerGap(240, Short.MAX_VALUE))
+                        .addComponent(jButtonDeleteAgent))
+                    .addComponent(jButton1))
+                .addContainerGap(297, Short.MAX_VALUE))
         );
         jPanelAgentsLayout.setVerticalGroup(
             jPanelAgentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -263,7 +273,9 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(jPanelAgentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxDeleteAgent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonDeleteAgent))
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1)
+                .addContainerGap(63, Short.MAX_VALUE))
         );
 
         jTabbedPaneOperations.addTab("Agents", jPanelAgents);
@@ -284,6 +296,13 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        jButton2.setText("Edit");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelMissionsLayout = new javax.swing.GroupLayout(jPanelMissions);
         jPanelMissions.setLayout(jPanelMissionsLayout);
         jPanelMissionsLayout.setHorizontalGroup(
@@ -295,8 +314,9 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(jPanelMissionsLayout.createSequentialGroup()
                         .addComponent(jComboBoxDeleteMission, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonDeleteMission)))
-                .addContainerGap(250, Short.MAX_VALUE))
+                        .addComponent(jButtonDeleteMission))
+                    .addComponent(jButton2))
+                .addContainerGap(311, Short.MAX_VALUE))
         );
         jPanelMissionsLayout.setVerticalGroup(
             jPanelMissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -307,7 +327,9 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(jPanelMissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButtonDeleteMission)
                     .addComponent(jComboBoxDeleteMission, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton2)
+                .addContainerGap(63, Short.MAX_VALUE))
         );
 
         jTabbedPaneOperations.addTab("Missions", jPanelMissions);
@@ -472,7 +494,7 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(jTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPaneOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 558, Short.MAX_VALUE)
+                    .addComponent(jTabbedPaneOperations)
                     .addComponent(jScrollPaneResultTable)))
         );
         layout.setVerticalGroup(
@@ -541,6 +563,16 @@ public class Main extends javax.swing.JFrame {
         worker.execute();
     }//GEN-LAST:event_jButtonRemoveAgentFromMissionActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        AgentSwingWorker worker = new AgentSwingWorker(AgentActionsEnum.UPDATE_AGENT);
+        worker.execute();  
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        MissionSwingWorker worker = new MissionSwingWorker(MissionActionsEnum.UPDATE_MISSION);
+        worker.execute();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -577,6 +609,8 @@ public class Main extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButtonAssignAgentOnMission;
     private javax.swing.JButton jButtonDeleteAgent;
     private javax.swing.JButton jButtonDeleteMission;
@@ -802,12 +836,12 @@ public class Main extends javax.swing.JFrame {
 
     private enum AgentActionsEnum {
 
-        REMOVE_AGENT, FIND_UNASSIGNED_AGENTS, FIND_ASSIGNED_AGENTS;
+        REMOVE_AGENT, FIND_UNASSIGNED_AGENTS, FIND_ASSIGNED_AGENTS, UPDATE_AGENT;
     }
 
     private enum MissionActionsEnum {
 
-        REMOVE_MISSION, FIND_FREE_MISSIONS, FIND_ASSIGNED_MISSION;
+        REMOVE_MISSION, FIND_FREE_MISSIONS, FIND_ASSIGNED_MISSION, UPDATE_MISSION;
     }
 
     private enum AssignmentsActionsEnum {
@@ -826,6 +860,17 @@ public class Main extends javax.swing.JFrame {
         @Override
         protected AgentsTableModel doInBackground() throws Exception {
             switch (actions) {
+                case UPDATE_AGENT:
+                    try{
+                        Integer number = getAgentNumberFromComboBoxValue((String) jComboBoxDeleteAgent.getSelectedItem());
+                        Agent updateAgent = agentManager.findAgentByAgentNumber(number);
+                        updateAgent.setName(JOptionPane.showInputDialog("Enter new name."));
+                        //updateAgent.setAgentNumber(JOptionPane.showInputDialog("Enter new number."));
+                        agentManager.updateAgent(updateAgent);
+                        break;                    
+                    } catch (ServiceFailureException ex){
+                        logger.log(Level.SEVERE, "Exception while updating agent.", ex);
+                    }
                 case REMOVE_AGENT:
                     try {
                         Integer number = getAgentNumberFromComboBoxValue((String) jComboBoxDeleteAgent.getSelectedItem());
@@ -861,6 +906,10 @@ public class Main extends javax.swing.JFrame {
         @Override
         protected void done() {
             switch (actions) {
+                case UPDATE_AGENT:
+                    refreshTable(TableModelsEnum.AGENTS_TABLE_MODEL);
+                    refreshJComboBoxes();
+                    break;
                 case REMOVE_AGENT:
                     refreshTable(TableModelsEnum.AGENTS_TABLE_MODEL);
                     refreshJComboBoxes();
@@ -895,6 +944,16 @@ public class Main extends javax.swing.JFrame {
         @Override
         protected MissionsTableModel doInBackground() throws Exception {
             switch (actions) {
+                    case UPDATE_MISSION:
+                    try{
+                        Mission updateMission = missionManager.findMissionByCodeName((String) jComboBoxDeleteMission.getSelectedItem());
+                        updateMission.setCodeName(JOptionPane.showInputDialog("Enter new name."));
+                        //updateAgent.setAgentNumber(JOptionPane.showInputDialog("Enter new number."));
+                        missionManager.updateMission(updateMission);
+                        break;                    
+                    } catch (ServiceFailureException ex){
+                        logger.log(Level.SEVERE, "Exception while updating mission.", ex);
+                    }
                 case REMOVE_MISSION:
                     try {
                         Mission deleteMission = missionManager.findMissionByCodeName((String) jComboBoxDeleteMission.getSelectedItem());
@@ -944,6 +1003,10 @@ public class Main extends javax.swing.JFrame {
         @Override
         protected void done() {
             switch (actions) {
+                case UPDATE_MISSION:
+                    refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
+                    refreshJComboBoxes();
+                    break;
                 case REMOVE_MISSION:
                     try {
                         if (get() != null) {
