@@ -626,14 +626,14 @@ public class Main extends javax.swing.JFrame {
         newDs.setUsername(username);
         newDs.setPassword(password);
 
-        try {
+//        try {
             //DBUtils.tryCreateTables(newDs, new URL("pv168.agencymanager.backend.createTables.sql"));
-            DBUtils.tryCreateTables(newDs, Main.class.getResource("/pv168/agencymanager/backend/createTables.sql"));
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(rootPane, "Error creating tables.", "Error", JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error creating tables");
-            System.exit(1);
-        }
+           // DBUtils.tryCreateTables(newDs, Main.class.getResource("/pv168/agencymanager/backend/createTables.sql"));
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(rootPane, "Error creating tables.", "Error", JOptionPane.ERROR_MESSAGE);
+//            logger.log(Level.SEVERE, "Error creating tables");
+//            System.exit(1);
+//        }
 
         return newDs;
     }
@@ -691,7 +691,7 @@ public class Main extends javax.swing.JFrame {
                 jButtonDeleteMission.setEnabled(true);
             }
             jComboBoxAssignAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_AGENTS)));
-            if (jComboBoxAssignAgent.getSelectedItem() == null) {
+            if (jComboBoxAssignAgent.getSelectedItem() == null || jComboBoxAssignMission.getSelectedItem() == null) {
                 jButtonAssignAgentOnMission.setEnabled(false);
                 jButtonRemoveAgentFromMission.setEnabled(false);
             } else {
@@ -699,7 +699,7 @@ public class Main extends javax.swing.JFrame {
                 jButtonRemoveAgentFromMission.setEnabled(true);
             }
             jComboBoxAssignMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_MISSIONS)));
-            if (jComboBoxAssignMission.getSelectedItem() == null) {
+            if (jComboBoxAssignMission.getSelectedItem() == null || jComboBoxAssignAgent.getSelectedItem() == null) {
                 jButtonAssignAgentOnMission.setEnabled(false);
                 jButtonRemoveAgentFromMission.setEnabled(false);
             } else {
@@ -707,13 +707,13 @@ public class Main extends javax.swing.JFrame {
                 jButtonRemoveAgentFromMission.setEnabled(true);
             }
             jComboBoxSearchAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_AGENTS)));
-            if (jComboBoxSearchAgent.getSelectedItem() == null) {
+            if (jComboBoxSearchAgent.getSelectedItem() == null || jComboBoxSearchMission.getSelectedItem() == null) {
                 jButtonFindAssignedMission.setEnabled(false);
             } else {
                 jButtonFindAssignedMission.setEnabled(true);
             }
             jComboBoxSearchMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_MISSIONS)));
-            if (jComboBoxSearchMission.getSelectedItem() == null) {
+            if (jComboBoxSearchMission.getSelectedItem() == null || jComboBoxSearchAgent.getSelectedItem() == null) {
                 jButtonFindAssignedAgents.setEnabled(false);
             } else {
                 jButtonFindAssignedAgents.setEnabled(true);
@@ -769,7 +769,7 @@ public class Main extends javax.swing.JFrame {
         }
         return false;
     }
-    
+
     private boolean checkIfUnassigned(Agent agent) {
         try {
             List<Agent> agents = spyAgencyManager.findUnassignedAgents();
@@ -779,13 +779,23 @@ public class Main extends javax.swing.JFrame {
         }
         return false;
     }
-    
+
     private boolean checkIfHasSpace(Mission mission) {
         try {
             List<Mission> missions = spyAgencyManager.findMissionsWithSomeFreeSpace();
             return missions.contains(mission);
         } catch (ServiceFailureException ex) {
             logger.log(Level.SEVERE, "Exception while checking free space of mission.", ex);
+        }
+        return false;
+    }
+
+    private boolean checkSafeToRemoveMission(Mission mission) {
+        try {
+            List<Agent> agentsOnMission = spyAgencyManager.getAgentsOnMission(mission);
+            return agentsOnMission.isEmpty();
+        } catch (ServiceFailureException | IllegalEntityException ex) {
+            logger.log(Level.SEVERE, "Exception while checking safety of mission removal.", ex);
         }
         return false;
     }
@@ -888,11 +898,16 @@ public class Main extends javax.swing.JFrame {
                 case REMOVE_MISSION:
                     try {
                         Mission deleteMission = missionManager.findMissionByCodeName((String) jComboBoxDeleteMission.getSelectedItem());
-                        missionManager.removeMission(deleteMission);
-                        break;
+                        if (checkSafeToRemoveMission(deleteMission)) {
+                            missionManager.removeMission(deleteMission);
+                            return new MissionsTableModel(strings);
+                        } else {
+                            return null;
+                        }
                     } catch (ServiceFailureException ex) {
                         logger.log(Level.SEVERE, "Exception while deleting mission from database", ex);
                     }
+                    break;
                 case FIND_FREE_MISSIONS:
                     try {
                         MissionsTableModel tm = new MissionsTableModel(strings);
@@ -905,10 +920,18 @@ public class Main extends javax.swing.JFrame {
                 case FIND_ASSIGNED_MISSION:
                     try {
                         MissionsTableModel tm = new MissionsTableModel(strings);
-                        tm.add(spyAgencyManager.findMissionWithAgent(agentManager
+                        Mission mission = spyAgencyManager.findMissionWithAgent(agentManager
                                 .findAgentByAgentNumber(getAgentNumberFromComboBoxValue(
-                                                (String) jComboBoxSearchAgent.getSelectedItem()))));
-                        return tm;
+                                                (String) jComboBoxSearchAgent.getSelectedItem())));
+//                        tm.add(spyAgencyManager.findMissionWithAgent(agentManager
+//                                .findAgentByAgentNumber(getAgentNumberFromComboBoxValue(
+//                                                (String) jComboBoxSearchAgent.getSelectedItem()))));
+                        if (mission != null) {
+                            tm.add(mission);
+                            return tm;
+                        } else {
+                            return null;
+                        }
                     } catch (ServiceFailureException ex) {
                         logger.log(Level.SEVERE, "Exception while getting assigned mission to agent from database.", ex);
                     }
@@ -922,8 +945,16 @@ public class Main extends javax.swing.JFrame {
         protected void done() {
             switch (actions) {
                 case REMOVE_MISSION:
-                    refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
-                    refreshJComboBoxes();
+                    try {
+                        if (get() != null) {
+                            refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
+                            refreshJComboBoxes();
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Selected mission has assigned agents!", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting table model in done() method.", ex);
+                    }
                     break;
                 case FIND_FREE_MISSIONS:
                     try {
@@ -934,7 +965,11 @@ public class Main extends javax.swing.JFrame {
                     break;
                 case FIND_ASSIGNED_MISSION:
                     try {
-                        showQuerryTable(get());
+                        if (get() != null) {
+                            showQuerryTable(get());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Selected Agent is not assigned on any mission.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     } catch (InterruptedException | ExecutionException ex) {
                         logger.log(Level.SEVERE, "Exception while getting table model in done() method.", ex);
                     }
