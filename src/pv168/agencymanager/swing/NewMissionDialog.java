@@ -6,10 +6,12 @@
 package pv168.agencymanager.swing;
 
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import pv168.agencymanager.backend.Mission;
 import pv168.agencymanager.backend.MissionManagerImpl;
 import static pv168.agencymanager.swing.NewAgentDialog.logger;
@@ -190,17 +192,8 @@ public class NewMissionDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAddMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddMissionActionPerformed
-        Mission mission = checkMission();
-
-        if (mission != null) {
-            try {
-                missionManager.createMission(mission);
-                logger.log(Level.INFO, "Successfuly created new mission.");
-                this.dispose();
-            } catch (ServiceFailureException ex) {
-                logger.log(Level.SEVERE, "Exception while creating new mission in database.", ex);
-            }
-        }
+        MissionSwingWorker worker = new MissionSwingWorker();
+        worker.execute();
     }//GEN-LAST:event_jButtonAddMissionActionPerformed
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
@@ -269,57 +262,87 @@ public class NewMissionDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldMaxAgents;
     // End of variables declaration//GEN-END:variables
 
-    private Mission checkMission() {
-        Mission mission = new Mission();
+    private class MissionSwingWorker extends SwingWorker<Boolean, Void> {
 
-        // Code Name
-        if (jTextFieldCodeName.getText() == null || jTextFieldCodeName.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted code name was NULL");
-            return null;
-        } else {
-            try {
-                if (missionManager.findMissionByCodeName(jTextFieldCodeName.getText()) != null) {
-                    JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_not_unique"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                    logger.log(Level.SEVERE, "Error: inserted code name was not unique.");
-                    return null;
-                } else {
-                    mission.setCodeName(jTextFieldCodeName.getText());
+        @Override
+        protected Boolean doInBackground() throws Exception {
+            Mission mission = checkMission();
+
+            if (mission != null) {
+                try {
+                    missionManager.createMission(mission);
+                    logger.log(Level.INFO, "Successfuly created new mission.");
+                    return true;
+                } catch (ServiceFailureException ex) {
+                    logger.log(Level.SEVERE, "Exception while creating new mission in database.", ex);
                 }
-            } catch (ServiceFailureException ex) {
-                logger.log(Level.SEVERE, "Exception while checking uniqeness of Code Name.", ex);
+            }
+            return false;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                if (get()){
+                    dispose();
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                logger.log(Level.SEVERE, "Exception while getting result in done() method", ex);
             }
         }
 
-        // Date created
-        mission.setDateCreated(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1)
-                + "-" + jComboBoxDay.getSelectedItem()));
+        private Mission checkMission() {
+            Mission mission = new Mission();
 
-        // Number of max agents on mission
-        try {
-            Integer i = Integer.parseInt(jTextFieldMaxAgents.getText());
-            if (i < 0) {
-                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
-                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+            // Code Name
+            if (jTextFieldCodeName.getText() == null || jTextFieldCodeName.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted code name was NULL");
                 return null;
             } else {
-                mission.setMaxNumberOfAgents(i);
+                try {
+                    if (missionManager.findMissionByCodeName(jTextFieldCodeName.getText()) != null) {
+                        JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_not_unique"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                        logger.log(Level.SEVERE, "Error: inserted code name was not unique.");
+                        return null;
+                    } else {
+                        mission.setCodeName(jTextFieldCodeName.getText());
+                    }
+                } catch (ServiceFailureException ex) {
+                    logger.log(Level.SEVERE, "Exception while checking uniqeness of Code Name.", ex);
+                }
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
-                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
-            return null;
+
+            // Date created
+            mission.setDateCreated(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1)
+                    + "-" + jComboBoxDay.getSelectedItem()));
+
+            // Number of max agents on mission
+            try {
+                Integer i = Integer.parseInt(jTextFieldMaxAgents.getText());
+                if (i < 0) {
+                    JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
+                            strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+                    return null;
+                } else {
+                    mission.setMaxNumberOfAgents(i);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
+                return null;
+            }
+
+            // Is in progress
+            mission.setInProgress(jCheckBoxInProgress.isSelected());
+
+            // Notes
+            mission.setNotes(jTextAreaNotes.getText());
+
+            return mission;
         }
 
-        // Is in progress
-        mission.setInProgress(jCheckBoxInProgress.isSelected());
-
-        // Notes
-        mission.setNotes(jTextAreaNotes.getText());
-
-        return mission;
     }
-
 }

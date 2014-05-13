@@ -9,11 +9,13 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 import org.apache.commons.dbcp.BasicDataSource;
 import pv168.agencymanager.backend.Agent;
@@ -38,16 +40,15 @@ public class Main extends javax.swing.JFrame {
     private AgentManagerImpl agentManager = new AgentManagerImpl();
     private MissionManagerImpl missionManager = new MissionManagerImpl();
     public static final Logger logger = Logger.getLogger(Main.class.getName());
-    
-    
+
     private enum ComboBoxEnum {
 
-        AllAgents, AllMissions;
+        ALL_AGENTS, ALL_MISSIONS, UNASSIGNED_AGENTS, FREE_MISSIONS;
     }
 
     private enum TableModelsEnum {
 
-        AgentsTableModel, MissionsTableModel;
+        AGENTS_TABLE_MODEL, MISSIONS_TABLE_MODEL;
     }
 
     /**
@@ -63,8 +64,8 @@ public class Main extends javax.swing.JFrame {
         missionManager.setDataSource(ds);
 
         refreshJComboBoxes();
-        refreshTable(TableModelsEnum.AgentsTableModel);
-        refreshTable(TableModelsEnum.MissionsTableModel);
+        refreshTable(TableModelsEnum.AGENTS_TABLE_MODEL);
+        refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
 
         // Localization of GUI elements
         jTabbedPane.setTitleAt(0, strings.getString("agents"));
@@ -489,109 +490,55 @@ public class Main extends javax.swing.JFrame {
     private void jButtonNewAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewAgentActionPerformed
         NewAgentDialog dialog = new NewAgentDialog(null, true, strings, agentManager);
         dialog.setVisible(true);
-        refreshTable(TableModelsEnum.AgentsTableModel);
+        refreshTable(TableModelsEnum.AGENTS_TABLE_MODEL);
         refreshJComboBoxes();
     }//GEN-LAST:event_jButtonNewAgentActionPerformed
 
     private void jButtonNewMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewMissionActionPerformed
         NewMissionDialog dialog = new NewMissionDialog(null, true, strings, missionManager);
         dialog.setVisible(true);
-        refreshTable(TableModelsEnum.MissionsTableModel);
+        refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
         refreshJComboBoxes();
     }//GEN-LAST:event_jButtonNewMissionActionPerformed
 
     private void jButtonDeleteAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAgentActionPerformed
-        try {
-            Integer number = getAgentNumberFromComboBoxValue((String) jComboBoxDeleteAgent.getSelectedItem());
-            Agent deleteAgent = agentManager.findAgentByAgentNumber(number);
-            agentManager.dismissAgent(deleteAgent);
-        } catch (ServiceFailureException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        refreshTable(TableModelsEnum.AgentsTableModel);
-        refreshJComboBoxes();
+        AgentSwingWorker worker = new AgentSwingWorker(AgentActionsEnum.REMOVE_AGENT);
+        worker.execute();
     }//GEN-LAST:event_jButtonDeleteAgentActionPerformed
 
     private void jButtonFindUnassignedAgentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFindUnassignedAgentsActionPerformed
-        try {
-            AgentsTableModel tm = new AgentsTableModel(strings);
-            tm.addAll(spyAgencyManager.findUnassignedAgents());
-            showQuerryTable(tm);
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while getting unassigned agents from database.", ex);
-        }
+        AgentSwingWorker worker = new AgentSwingWorker(AgentActionsEnum.FIND_UNASSIGNED_AGENTS);
+        worker.execute();
     }//GEN-LAST:event_jButtonFindUnassignedAgentsActionPerformed
 
     private void jButtonFindMissionsWithFreeSpaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFindMissionsWithFreeSpaceActionPerformed
-        try {
-            MissionsTableModel tm = new MissionsTableModel(strings);
-            tm.addAll(spyAgencyManager.findMissionsWithSomeFreeSpace());
-            showQuerryTable(tm);
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while getting missions with free space from database.", ex);
-        }
+        MissionSwingWorker worker = new MissionSwingWorker(MissionActionsEnum.FIND_FREE_MISSIONS);
+        worker.execute();
     }//GEN-LAST:event_jButtonFindMissionsWithFreeSpaceActionPerformed
 
     private void jButtonFindAssignedMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFindAssignedMissionActionPerformed
-        try {
-            MissionsTableModel tm = new MissionsTableModel(strings);
-            tm.add(spyAgencyManager.findMissionWithAgent(agentManager
-                    .findAgentByAgentNumber(getAgentNumberFromComboBoxValue(
-                                    (String) jComboBoxSearchAgent.getSelectedItem()))));
-            showQuerryTable(tm);
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while getting assigned mission to agent from database.", ex);
-        }
+        MissionSwingWorker worker = new MissionSwingWorker(MissionActionsEnum.FIND_ASSIGNED_MISSION);
+        worker.execute();
     }//GEN-LAST:event_jButtonFindAssignedMissionActionPerformed
 
     private void jButtonFindAssignedAgentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFindAssignedAgentsActionPerformed
-        try {
-            AgentsTableModel tm = new AgentsTableModel(strings);
-            tm.addAll(spyAgencyManager.getAgentsOnMission(missionManager
-                    .findMissionByCodeName((String) jComboBoxSearchMission.getSelectedItem())));
-            showQuerryTable(tm);
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while getting agents assigned to mission from database.", ex);
-        }
+        AgentSwingWorker worker = new AgentSwingWorker(AgentActionsEnum.FIND_ASSIGNED_AGENTS);
+        worker.execute();
     }//GEN-LAST:event_jButtonFindAssignedAgentsActionPerformed
 
     private void jButtonDeleteMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteMissionActionPerformed
-        try {
-            Mission deleteMission = missionManager.findMissionByCodeName((String) jComboBoxDeleteMission.getSelectedItem());
-            missionManager.removeMission(deleteMission);
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while deleting mission from database", ex);
-        }
-        refreshTable(TableModelsEnum.MissionsTableModel);
-        refreshJComboBoxes();
+        MissionSwingWorker worker = new MissionSwingWorker(MissionActionsEnum.REMOVE_MISSION);
+        worker.execute();
     }//GEN-LAST:event_jButtonDeleteMissionActionPerformed
 
     private void jButtonAssignAgentOnMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAssignAgentOnMissionActionPerformed
-        try {
-            Agent agent = agentManager.findAgentByAgentNumber(
-                    getAgentNumberFromComboBoxValue((String) jComboBoxAssignAgent.getSelectedItem()));
-            Mission mission = missionManager.findMissionByCodeName((String) jComboBoxAssignMission.getSelectedItem());
-            spyAgencyManager.assignAgentOnMission(agent, mission);
-            JOptionPane.showMessageDialog(null, "Agent successfuly assigned on a Mission.");
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while assigning agent on a mission", ex);
-        }
+        AssignmentSwingWorker worker = new AssignmentSwingWorker(AssignmentsActionsEnum.ASSIGN_AGENT_ON_MISSION);
+        worker.execute();
     }//GEN-LAST:event_jButtonAssignAgentOnMissionActionPerformed
 
     private void jButtonRemoveAgentFromMissionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveAgentFromMissionActionPerformed
-        try {
-            Agent agent = agentManager.findAgentByAgentNumber(
-                    getAgentNumberFromComboBoxValue((String) jComboBoxAssignAgent.getSelectedItem()));
-            Mission mission = missionManager.findMissionByCodeName((String) jComboBoxAssignMission.getSelectedItem());
-            if (checkAssignment(agent, mission)) {
-                spyAgencyManager.removeAgentFromMission(agent, mission);
-                JOptionPane.showMessageDialog(null, "Agent successfuly removed from Mission.");
-            } else {
-                JOptionPane.showMessageDialog(null, "Selected agent is not assigned on selected Mission!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while removing agent from a mission", ex);
-        }
+        AssignmentSwingWorker worker = new AssignmentSwingWorker(AssignmentsActionsEnum.REMOVE_AGENT_FROM_MISSION);
+        worker.execute();
     }//GEN-LAST:event_jButtonRemoveAgentFromMissionActionPerformed
 
     /**
@@ -696,16 +643,30 @@ public class Main extends javax.swing.JFrame {
         String[] resultArray = null;
 
         switch (mode) {
-            case AllAgents:
+            case ALL_AGENTS:
                 resultArray = new String[agentManager.getAllAgents().size()];
                 for (Agent agent : agentManager.getAllAgents()) {
                     resultArray[i] = agent.getName() + " (" + agent.getAgentNumber() + ")";
                     i++;
                 }
                 break;
-            case AllMissions:
+            case ALL_MISSIONS:
                 resultArray = new String[missionManager.getAllMissions().size()];
                 for (Mission mission : missionManager.getAllMissions()) {
+                    resultArray[i] = mission.getCodeName();
+                    i++;
+                }
+                break;
+            case UNASSIGNED_AGENTS:
+                resultArray = new String[spyAgencyManager.findUnassignedAgents().size()];
+                for (Agent agent : spyAgencyManager.findUnassignedAgents()) {
+                    resultArray[i] = agent.getName() + " (" + agent.getAgentNumber() + ")";
+                    i++;
+                }
+                break;
+            case FREE_MISSIONS:
+                resultArray = new String[spyAgencyManager.findMissionsWithSomeFreeSpace().size()];
+                for (Mission mission : spyAgencyManager.findMissionsWithSomeFreeSpace()) {
                     resultArray[i] = mission.getCodeName();
                     i++;
                 }
@@ -717,19 +678,19 @@ public class Main extends javax.swing.JFrame {
 
     private void refreshJComboBoxes() {
         try {
-            jComboBoxDeleteAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            jComboBoxDeleteAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_AGENTS)));
             if (jComboBoxDeleteAgent.getSelectedItem() == null) {
                 jButtonDeleteAgent.setEnabled(false);
             } else {
                 jButtonDeleteAgent.setEnabled(true);
             }
-            jComboBoxDeleteMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+            jComboBoxDeleteMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_MISSIONS)));
             if (jComboBoxDeleteMission.getSelectedItem() == null) {
                 jButtonDeleteMission.setEnabled(false);
             } else {
                 jButtonDeleteMission.setEnabled(true);
             }
-            jComboBoxAssignAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            jComboBoxAssignAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_AGENTS)));
             if (jComboBoxAssignAgent.getSelectedItem() == null) {
                 jButtonAssignAgentOnMission.setEnabled(false);
                 jButtonRemoveAgentFromMission.setEnabled(false);
@@ -737,7 +698,7 @@ public class Main extends javax.swing.JFrame {
                 jButtonAssignAgentOnMission.setEnabled(true);
                 jButtonRemoveAgentFromMission.setEnabled(true);
             }
-            jComboBoxAssignMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+            jComboBoxAssignMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_MISSIONS)));
             if (jComboBoxAssignMission.getSelectedItem() == null) {
                 jButtonAssignAgentOnMission.setEnabled(false);
                 jButtonRemoveAgentFromMission.setEnabled(false);
@@ -745,13 +706,13 @@ public class Main extends javax.swing.JFrame {
                 jButtonAssignAgentOnMission.setEnabled(true);
                 jButtonRemoveAgentFromMission.setEnabled(true);
             }
-            jComboBoxSearchAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllAgents)));
+            jComboBoxSearchAgent.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_AGENTS)));
             if (jComboBoxSearchAgent.getSelectedItem() == null) {
                 jButtonFindAssignedMission.setEnabled(false);
             } else {
                 jButtonFindAssignedMission.setEnabled(true);
             }
-            jComboBoxSearchMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.AllMissions)));
+            jComboBoxSearchMission.setModel(new DefaultComboBoxModel(getJComboBoxValues(ComboBoxEnum.ALL_MISSIONS)));
             if (jComboBoxSearchMission.getSelectedItem() == null) {
                 jButtonFindAssignedAgents.setEnabled(false);
             } else {
@@ -764,7 +725,7 @@ public class Main extends javax.swing.JFrame {
 
     private void refreshTable(TableModelsEnum model) {
         switch (model) {
-            case AgentsTableModel:
+            case AGENTS_TABLE_MODEL:
                 try {
                     //AgentsTableModel tm = (AgentsTableModel) model;
                     AgentsTableModel tm = new AgentsTableModel(strings);
@@ -774,7 +735,7 @@ public class Main extends javax.swing.JFrame {
                 } catch (ServiceFailureException ex) {
                     logger.log(Level.SEVERE, "Exception while refreshing Agents table.", ex);
                 }
-            case MissionsTableModel:
+            case MISSIONS_TABLE_MODEL:
                 try {
                     //MissionsTableModel tm = (MissionsTableModel) model;
                     MissionsTableModel tm = new MissionsTableModel(strings);
@@ -798,7 +759,7 @@ public class Main extends javax.swing.JFrame {
         revalidate();
         repaint();
     }
-    
+
     private boolean checkAssignment(Agent agent, Mission mission) {
         try {
             List<Agent> assignedAgents = spyAgencyManager.getAgentsOnMission(mission);
@@ -807,5 +768,253 @@ public class Main extends javax.swing.JFrame {
             logger.log(Level.SEVERE, "Exception while getting list of assigned Agents", ex);
         }
         return false;
+    }
+    
+    private boolean checkIfUnassigned(Agent agent) {
+        try {
+            List<Agent> agents = spyAgencyManager.findUnassignedAgents();
+            return agents.contains(agent);
+        } catch (ServiceFailureException ex) {
+            logger.log(Level.SEVERE, "Exception while checking availability of agent.", ex);
+        }
+        return false;
+    }
+    
+    private boolean checkIfHasSpace(Mission mission) {
+        try {
+            List<Mission> missions = spyAgencyManager.findMissionsWithSomeFreeSpace();
+            return missions.contains(mission);
+        } catch (ServiceFailureException ex) {
+            logger.log(Level.SEVERE, "Exception while checking free space of mission.", ex);
+        }
+        return false;
+    }
+
+    private enum AgentActionsEnum {
+
+        REMOVE_AGENT, FIND_UNASSIGNED_AGENTS, FIND_ASSIGNED_AGENTS;
+    }
+
+    private enum MissionActionsEnum {
+
+        REMOVE_MISSION, FIND_FREE_MISSIONS, FIND_ASSIGNED_MISSION;
+    }
+
+    private enum AssignmentsActionsEnum {
+
+        ASSIGN_AGENT_ON_MISSION, REMOVE_AGENT_FROM_MISSION;
+    }
+
+    private class AgentSwingWorker extends SwingWorker<AgentsTableModel, Void> {
+
+        AgentActionsEnum actions;
+
+        public AgentSwingWorker(AgentActionsEnum actions) {
+            this.actions = actions;
+        }
+
+        @Override
+        protected AgentsTableModel doInBackground() throws Exception {
+            switch (actions) {
+                case REMOVE_AGENT:
+                    try {
+                        Integer number = getAgentNumberFromComboBoxValue((String) jComboBoxDeleteAgent.getSelectedItem());
+                        Agent deleteAgent = agentManager.findAgentByAgentNumber(number);
+                        agentManager.dismissAgent(deleteAgent);
+                        break;
+                    } catch (ServiceFailureException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                case FIND_UNASSIGNED_AGENTS:
+                    try {
+                        AgentsTableModel tm = new AgentsTableModel(strings);
+                        tm.addAll(spyAgencyManager.findUnassignedAgents());
+                        return tm;
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting unassigned agents from database.", ex);
+                    }
+                case FIND_ASSIGNED_AGENTS:
+                    try {
+                        AgentsTableModel tm = new AgentsTableModel(strings);
+                        tm.addAll(spyAgencyManager.getAgentsOnMission(missionManager
+                                .findMissionByCodeName((String) jComboBoxSearchMission.getSelectedItem())));
+                        return tm;
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting agents assigned to mission from database.", ex);
+                    }
+                    break;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            switch (actions) {
+                case REMOVE_AGENT:
+                    refreshTable(TableModelsEnum.AGENTS_TABLE_MODEL);
+                    refreshJComboBoxes();
+                    break;
+                case FIND_UNASSIGNED_AGENTS:
+                    try {
+                        showQuerryTable(get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting table model in get() method.", ex);
+                    }
+                    break;
+                case FIND_ASSIGNED_AGENTS:
+                    try {
+                        showQuerryTable(get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting table model in done() method.", ex);
+                    }
+                    break;
+            }
+        }
+
+    }
+
+    private class MissionSwingWorker extends SwingWorker<MissionsTableModel, Void> {
+
+        MissionActionsEnum actions;
+
+        public MissionSwingWorker(MissionActionsEnum actions) {
+            this.actions = actions;
+        }
+
+        @Override
+        protected MissionsTableModel doInBackground() throws Exception {
+            switch (actions) {
+                case REMOVE_MISSION:
+                    try {
+                        Mission deleteMission = missionManager.findMissionByCodeName((String) jComboBoxDeleteMission.getSelectedItem());
+                        missionManager.removeMission(deleteMission);
+                        break;
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while deleting mission from database", ex);
+                    }
+                case FIND_FREE_MISSIONS:
+                    try {
+                        MissionsTableModel tm = new MissionsTableModel(strings);
+                        tm.addAll(spyAgencyManager.findMissionsWithSomeFreeSpace());
+                        return tm;
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting missions with free space from database.", ex);
+                    }
+                    break;
+                case FIND_ASSIGNED_MISSION:
+                    try {
+                        MissionsTableModel tm = new MissionsTableModel(strings);
+                        tm.add(spyAgencyManager.findMissionWithAgent(agentManager
+                                .findAgentByAgentNumber(getAgentNumberFromComboBoxValue(
+                                                (String) jComboBoxSearchAgent.getSelectedItem()))));
+                        return tm;
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting assigned mission to agent from database.", ex);
+                    }
+                    break;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            switch (actions) {
+                case REMOVE_MISSION:
+                    refreshTable(TableModelsEnum.MISSIONS_TABLE_MODEL);
+                    refreshJComboBoxes();
+                    break;
+                case FIND_FREE_MISSIONS:
+                    try {
+                        showQuerryTable(get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting table model in get() method.", ex);
+                    }
+                    break;
+                case FIND_ASSIGNED_MISSION:
+                    try {
+                        showQuerryTable(get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting table model in done() method.", ex);
+                    }
+                    break;
+            }
+        }
+    }
+
+    private class AssignmentSwingWorker extends SwingWorker<Boolean, Void> {
+
+        AssignmentsActionsEnum actions;
+
+        public AssignmentSwingWorker(AssignmentsActionsEnum actions) {
+            this.actions = actions;
+        }
+
+        @Override
+        protected Boolean doInBackground() throws Exception {
+            switch (actions) {
+                case ASSIGN_AGENT_ON_MISSION:
+                    try {
+                        Agent agent = agentManager.findAgentByAgentNumber(
+                                getAgentNumberFromComboBoxValue((String) jComboBoxAssignAgent.getSelectedItem()));
+                        Mission mission = missionManager.findMissionByCodeName((String) jComboBoxAssignMission.getSelectedItem());
+                        if (checkIfUnassigned(agent) && checkIfHasSpace(mission)) {
+                            spyAgencyManager.assignAgentOnMission(agent, mission);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while assigning agent on a mission", ex);
+                    }
+                    break;
+                case REMOVE_AGENT_FROM_MISSION:
+                    try {
+                        Agent agent = agentManager.findAgentByAgentNumber(
+                                getAgentNumberFromComboBoxValue((String) jComboBoxAssignAgent.getSelectedItem()));
+                        Mission mission = missionManager.findMissionByCodeName((String) jComboBoxAssignMission.getSelectedItem());
+                        if (checkAssignment(agent, mission)) {
+                            spyAgencyManager.removeAgentFromMission(agent, mission);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } catch (ServiceFailureException ex) {
+                        logger.log(Level.SEVERE, "Exception while removing agent from a mission", ex);
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        @Override
+        protected void done() {
+            switch (actions) {
+                case ASSIGN_AGENT_ON_MISSION:
+                    try {
+                        if (get()) {
+                            JOptionPane.showMessageDialog(null, "Agent successfuly assigned on a Mission.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Selected agent is already assigned and/or selected mission is full!", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting boolean in done() method.", ex);
+                    }
+                    break;
+                case REMOVE_AGENT_FROM_MISSION:
+                    try {
+                        if (get()) {
+                            JOptionPane.showMessageDialog(null, "Agent successfuly removed from Mission.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Selected agent is not assigned on selected Mission!", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.log(Level.SEVERE, "Exception while getting boolean in done() method.s", ex);
+                    }
+                    break;
+            }
+        }
+
     }
 }

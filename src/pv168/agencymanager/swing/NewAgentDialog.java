@@ -5,11 +5,14 @@
  */
 package pv168.agencymanager.swing;
 
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import pv168.agencymanager.backend.Agent;
 import pv168.agencymanager.backend.AgentManagerImpl;
 import pv168.common.DBUtils;
@@ -35,7 +38,7 @@ public class NewAgentDialog extends javax.swing.JDialog {
         this.strings = strings;
         this.agentManager = agentManager;
         daysMonthsYears = new DaysMonthsYears(getLocale());
-        
+
         jComboBoxDay.setModel(new DefaultComboBoxModel(daysMonthsYears.DAYS));
         jComboBoxMonth.setModel(new DefaultComboBoxModel(daysMonthsYears.MONTHS));
         jComboBoxYear.setModel(new DefaultComboBoxModel(daysMonthsYears.YEARS));
@@ -49,7 +52,7 @@ public class NewAgentDialog extends javax.swing.JDialog {
         jLabelName.setText(strings.getString("name") + ":");
         jLabelNumber.setText(strings.getString("agentNumber") + ":");
         jLabelDateEnrolled.setText(strings.getString("dateOfEnrollment") + ":");
-        jLabelIsDead.setText(strings.getString("isDead") + ":");        
+        jLabelIsDead.setText(strings.getString("isDead") + ":");
     }
 
     /**
@@ -177,17 +180,9 @@ public class NewAgentDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAddAgentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAgentActionPerformed
-        Agent agent = checkAgent();
+        AgentSwingWorker worker = new AgentSwingWorker();
+        worker.execute();
         
-        if (agent != null) {
-            try {
-                agentManager.trainAgent(agent);
-                logger.log(Level.INFO, "Agent was added to table.");
-                this.dispose();
-            } catch (ServiceFailureException ex) {
-                logger.log(Level.SEVERE, "Exception while trying to add new Agent to database.", ex);
-            }
-        }
     }//GEN-LAST:event_jButtonAddAgentActionPerformed
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
@@ -253,50 +248,82 @@ public class NewAgentDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldNumber;
     // End of variables declaration//GEN-END:variables
 
-    public Agent checkAgent() {
-        Agent agent = new Agent();
-        
-        // Name
-        if (jTextFieldName.getText() == null || jTextFieldName.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted name was NULL");
-            return null;
-        } else {
-            agent.setName(jTextFieldName.getText());
+
+    private class AgentSwingWorker extends SwingWorker<Boolean, Void> {
+
+        @Override
+        protected Boolean doInBackground() throws Exception {
+            Agent agent = checkAgent();
+
+            if (agent != null) {
+                try {
+                    agentManager.trainAgent(agent);
+                    logger.log(Level.INFO, "Agent was added to table.");
+                    return true;
+                } catch (ServiceFailureException ex) {
+                    logger.log(Level.SEVERE, "Exception while trying to add new Agent to database.", ex);
+                }
+            }
+            return false;
         }
-        
-        // Agent Number
-        try {
-            Integer i = Integer.parseInt(jTextFieldNumber.getText());
-            if (i < 0) {
-                JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
-                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
-                return null;
-            } else if (agentManager.findAgentByAgentNumber(i) != null) {
-                JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_unique_number"),
-                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, "Error: inserted number that was not unique");
+
+        @Override
+        protected void done() {
+            try {
+                if (get()) {
+                    dispose();
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                logger.log(Level.SEVERE, "Exception while getting result in get() method.", ex);
+            }
+        }
+
+        public Agent checkAgent() {
+            Agent agent = new Agent();
+
+            // Name
+            if (jTextFieldName.getText() == null || jTextFieldName.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_name_null"), strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted name was NULL");
                 return null;
             } else {
-                agent.setAgentNumber(i);
+                agent.setName(jTextFieldName.getText());
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
-                    strings.getString("error"), JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
-            return null;
-        } catch (ServiceFailureException ex) {
-            logger.log(Level.SEVERE, "Exception while checking uniqueness of inserted Agent Number", ex);
+
+            // Agent Number
+            try {
+                Integer i = Integer.parseInt(jTextFieldNumber.getText());
+                if (i < 0) {
+                    JOptionPane.showMessageDialog(rootPane, strings.getString("error_negative_number"),
+                            strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.SEVERE, "Error: inserted number was lower than 0");
+                    return null;
+                } else if (agentManager.findAgentByAgentNumber(i) != null) {
+                    JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_unique_number"),
+                            strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.SEVERE, "Error: inserted number that was not unique");
+                    return null;
+                } else {
+                    agent.setAgentNumber(i);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(rootPane, strings.getString("error_not_a_number"),
+                        strings.getString("error"), JOptionPane.ERROR_MESSAGE);
+                logger.log(Level.SEVERE, "Error: inserted number was not a legal number");
+                return null;
+            } catch (ServiceFailureException ex) {
+                logger.log(Level.SEVERE, "Exception while checking uniqueness of inserted Agent Number", ex);
+            }
+
+            // Date of Enrollment
+            agent.setDateOfEnrollment(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1)
+                    + "-" + jComboBoxDay.getSelectedItem()));
+
+            // Is Dead
+            agent.setIsDead(jCheckBoxIsDead.isSelected());
+
+            return agent;
         }
-        
-        // Date of Enrollment
-        agent.setDateOfEnrollment(DBUtils.date(jComboBoxYear.getSelectedItem() + "-" + (jComboBoxMonth.getSelectedIndex() + 1) +
-                "-" + jComboBoxDay.getSelectedItem()));
-        
-        // Is Dead
-        agent.setIsDead(jCheckBoxIsDead.isSelected());
-        
-        return agent;
+
     }
 }
